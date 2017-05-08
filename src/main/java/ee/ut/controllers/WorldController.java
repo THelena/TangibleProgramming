@@ -100,6 +100,9 @@ public class WorldController {
     }
 
     public void initialize(String level, Stage primaryStage, Pane root) {
+
+        parentGrid.setStyle("-fx-background-color: #ffffff;");
+
         if (symbolStyle == SymbolStyle.TOPCODES) {
             worldImageFolder = "topcodesPrograms/";
         } else {
@@ -303,12 +306,14 @@ public class WorldController {
                 stopButton.setDisable(true);
                 resultLabel.setText("Kahjuks sattus jänes lõksu.");
                 enableButtons();
+                startButton.setDisable(true);
             } catch (CannotWalkIntoWall cannotWalkIntoWall) {
                 currentTimeline.stop();
                 takenSteps = 0;
                 stopButton.setDisable(true);
                 resultLabel.setText("Kahjuks tuli jänesel sein ette.");
                 enableButtons();
+                startButton.setDisable(true);
             }
 
             if (((Move) currentNode).getSteps() == takenSteps) {
@@ -645,13 +650,9 @@ public class WorldController {
         currentTimeline.stop();
         takenSteps = 0;
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fxml/world.fxml"));
-        Pane root = fxmlLoader.load();
-
-        WorldController worldController = fxmlLoader.getController();
-        worldController.setCurrentImageNr(currentImageNr);
-        worldController.setPrimaryStage(primaryStage);
-        worldController.setSymbolStyle(symbolStyle);
-        worldController.initialize(currentLevel, primaryStage, root);
+        enableButtons();
+        startButton.setDisable(true);
+        stopButton.setDisable(true);
+        resultLabel.setText("Programmi täitmine on peatatud.");
     }
 }
