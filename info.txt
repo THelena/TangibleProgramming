@@ -1,0 +1,3 @@
+Sümbolid on 80 x 80 px tüki peal.
+Tüki mõõtmed on 100mm x 100mm
+Border tükil on 5px

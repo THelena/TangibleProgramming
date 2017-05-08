@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ee.ut.controllers.MainController">
+   <children>
+      <ChoiceBox fx:id="choiceBox" layoutX="350.0" layoutY="136.0" prefWidth="150.0" AnchorPane.rightAnchor="100.0" />
+      <Button fx:id="playButton" layoutX="239.0" layoutY="311.0" mnemonicParsing="false" onAction="#initWorld" text="Alusta mängu!" />
+      <Label alignment="TOP_LEFT" layoutX="351.0" layoutY="66.0" prefHeight="75.0" prefWidth="222.0" text="Alustamiseks vali sobiv tase. Tasemed lähevad järjest raskemaks ning soovitame alustada algusest!" wrapText="true" />
+      <Label alignment="TOP_LEFT" layoutX="23.0" layoutY="69.0" prefHeight="201.0" prefWidth="228.0" text="Käesolevas mängus on vaja luua programm, mis juhatab jänese läbi labürindi porgandini. Vali maailmale sobiv programmipilt ning vajuta käivitamise nuppu. Väldi maailmas lõksu ja vastu seina sattumist! Tase on edukalt sooritatud, kui programmi lõpuks on jänes jõudnud porgandini." wrapText="true" />
+      <Label layoutX="259.0" layoutY="32.0" text="LABÜRINT" />
+      <RadioButton fx:id="radioButtonCustom" layoutX="350.0" layoutY="227.0" mnemonicParsing="false" text="Autori disainitud sümbolid" />
+      <RadioButton fx:id="radioButtonTopCodes" layoutX="350.0" layoutY="252.0" mnemonicParsing="false" text="TopCodes sümbolid" />
+      <Label layoutX="349.0" layoutY="187.0" prefHeight="34.0" prefWidth="187.0" text="Lisaks vali, milliste sümbolitega klotse kasutad:" wrapText="true" />
+   </children>
+</AnchorPane>
