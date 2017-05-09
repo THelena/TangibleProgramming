@@ -35,11 +35,6 @@ public class ProgramGenerator {
         this.symbolStyle = symbolStyle;
     }
 
-    public static void main(String[] args) throws NoStartPieceError, IOException {
-        ProgramGenerator programGenerator = new ProgramGenerator("customPrograms/4.jpg", SymbolStyle.CUSTOM);
-        TreeNode treeNode = programGenerator.generateProgram();
-    }
-
     private void updateParentsAndChildren(TreeNode parent, TreeNode child, boolean isTrueNode) {
         child.setParent(parent);
         if (parent instanceof UnaryNode) {

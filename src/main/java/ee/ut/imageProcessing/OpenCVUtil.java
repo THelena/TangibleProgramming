@@ -15,19 +15,9 @@ public class OpenCVUtil {
     private OpenCVUtil() {
     }
 
-    /**
-     * Convert a Mat object (OpenCV) in the corresponding Image for JavaFX
-     *
-     * @param frame
-     *            the {@link Mat} representing the current frame
-     * @return the {@link Image} to show
-     */
     public static Image mat2Image(Mat frame) {
-        // create a temporary buffer
         MatOfByte buffer = new MatOfByte();
-        // encode the frame in the buffer, according to the PNG format
         Imgcodecs.imencode(".png", frame, buffer);
-        // build and return an Image created from the image encoded in the buffer
         return new Image(new ByteArrayInputStream(buffer.toArray()));
     }
 
@@ -37,7 +27,6 @@ public class OpenCVUtil {
     }
 
     private static byte[] readStream(InputStream stream) throws IOException {
-        // Copy content of the image to byte-array
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int nRead;
         byte[] data = new byte[16384];

@@ -46,8 +46,6 @@ public class MainController {
     }
 
     public void fillChoiceBox() throws IOException{
-//        ClassLoader classLoader = getClass().getClassLoader();
-//        File file = new File(classLoader.getResource("levels.txt").getFile());
         InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("levels.txt");
         try(BufferedReader br = new BufferedReader(new InputStreamReader(resourceAsStream))) {
             String line = br.readLine();

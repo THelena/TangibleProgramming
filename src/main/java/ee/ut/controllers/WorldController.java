@@ -48,7 +48,6 @@ public class WorldController {
      */
     @FXML
     private GridPane gridPane;
-
     @FXML
     public ImageView worldImage;
     @FXML
@@ -627,7 +626,7 @@ public class WorldController {
         mainController.setPrimaryStage(primaryStage);
 
         primaryStage.setMaximized(false);
-        // Initial main window sizes // TODO: 27.04.17 consider using some constants
+        // Initial main window sizes
         primaryStage.setWidth(600d);
         primaryStage.setHeight(400d);
 

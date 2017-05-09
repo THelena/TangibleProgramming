@@ -47,10 +47,6 @@ public class ImageParser {
         return scan;
     }
 
-    /**
-     * Scans the images for topcodes and rotates its coordinates to correspond to a horizontal image
-     * @return
-     */
     private List<MatchPair> getLocationsForTopcodes() throws NoStartPieceError {
         Scanner scanner = new Scanner();
         try {
@@ -149,8 +145,6 @@ public class ImageParser {
         }
     }
 
-    private static int counter = 1;
-
     private Rect createVerticalCropRect(Point startingPoint) {
         int x = (int) (startingPoint.x - templateHeight);
         if (x < 0) x = 0;
@@ -239,7 +233,6 @@ public class ImageParser {
             }
         }
 
-
         while (!moveMatches.isEmpty()) {
             MatchPair moveMatch = moveMatches.remove(0);
             Rect moveRect = createRectForMove(moveMatch.getLocation());
@@ -258,7 +251,6 @@ public class ImageParser {
             if (argumentMatch != null) matches.add(argumentMatch);
         }
 
-
         if (ifStatementMatch != null) {
             Rect verticalRect = createVerticalCropRect(ifStatementMatch.getLocation());
             Mat verticalCrop = new Mat(inputImage, verticalRect);
@@ -266,8 +258,6 @@ public class ImageParser {
             Point verticalCropLocation = verticalRect.tl();
 
             List<Point> transitionPoints = matchTemplate(verticalCrop, modifiedTemplates.get(TRANSITION));
-
-//            if (transitionPoints.size() != 0 && transitionPoints.size() % 2 != 0) throw new RuntimeException("Couldn't find even amount of transition pieces.");
 
             List<Point> transitions = getTransitionPointsForIfStatement(ifStatementMatch.getLocation(), transitionPoints);
 
