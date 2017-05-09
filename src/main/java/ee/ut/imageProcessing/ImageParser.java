@@ -266,22 +266,31 @@ public class ImageParser {
             Point verticalCropLocation = verticalRect.tl();
 
             List<Point> transitionPoints = matchTemplate(verticalCrop, modifiedTemplates.get(TRANSITION));
-            if (transitionPoints.size() != 0 && transitionPoints.size() % 2 != 0) throw new RuntimeException("Couldn't find even amount of transition pieces.");
+
+//            if (transitionPoints.size() != 0 && transitionPoints.size() % 2 != 0) throw new RuntimeException("Couldn't find even amount of transition pieces.");
 
             List<Point> transitions = getTransitionPointsForIfStatement(ifStatementMatch.getLocation(), transitionPoints);
 
-            Point transitionAbsolutePointCoordinates = getAbsolutePointCoordinates(verticalCropLocation, transitions.get(0));
-            Rect horisontalCropRect1 = createHorisontalCropRect(transitionAbsolutePointCoordinates);
-            matches.add(new MatchPair(TRANSITION, transitionAbsolutePointCoordinates));
-            Point transitionAbsolutePointCoordinates2 = getAbsolutePointCoordinates(verticalCropLocation, transitions.get(1));
-            Rect horisontalCropRect2 = createHorisontalCropRect(transitionAbsolutePointCoordinates2);
-            matches.add(new MatchPair(TRANSITION, transitionAbsolutePointCoordinates2));
+            Point transitionAbove = transitions.get(0);
+            Point transitionBelow = transitions.get(1);
 
-            Mat horisontalCrop1 = new Mat(inputImage, horisontalCropRect1);
-            Mat horisontalCrop2 = new Mat(inputImage, horisontalCropRect2);
+            if (transitionAbove != null) {
+                Point transitionAbsolutePointCoordinates = getAbsolutePointCoordinates(verticalCropLocation, transitionAbove);
+                Rect horisontalCropRect1 = createHorisontalCropRect(transitionAbsolutePointCoordinates);
+                matches.add(new MatchPair(TRANSITION, transitionAbsolutePointCoordinates));
 
-            matches.addAll(getLocationsForCustom(horisontalCrop1, modifiedTemplates, match_method, horisontalCropRect1.tl()));
-            matches.addAll(getLocationsForCustom(horisontalCrop2, modifiedTemplates, match_method, horisontalCropRect2.tl()));
+                Mat horisontalCrop1 = new Mat(inputImage, horisontalCropRect1);
+                matches.addAll(getLocationsForCustom(horisontalCrop1, modifiedTemplates, match_method, horisontalCropRect1.tl()));
+            }
+
+            if (transitionBelow != null) {
+                Point transitionAbsolutePointCoordinates2 = getAbsolutePointCoordinates(verticalCropLocation, transitions.get(1));
+                Rect horisontalCropRect2 = createHorisontalCropRect(transitionAbsolutePointCoordinates2);
+                matches.add(new MatchPair(TRANSITION, transitionAbsolutePointCoordinates2));
+
+                Mat horisontalCrop2 = new Mat(inputImage, horisontalCropRect2);
+                matches.addAll(getLocationsForCustom(horisontalCrop2, modifiedTemplates, match_method, horisontalCropRect2.tl()));
+            }
         }
         return matches;
     }

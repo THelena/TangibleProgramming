@@ -352,12 +352,14 @@ public class WorldController {
     }
 
     private void handleProgramEnd() {
+        enableButtons();
         if (table.get(rabbitY).get(rabbitX) == 'c') {
             resultLabel.setText("Tase edukalt läbitud!");
+            startButton.setDisable(true);
         } else {
             resultLabel.setText("Jänes ei jõudnud porgandini. Jätka soovi korral taseme läbimist praegusest asukohast või alusta uuesti.");
         }
-        enableButtons();
+        stopButton.setDisable(true);
     }
 
     private void handleIfStatement(IfStatement ifStatement) {
@@ -396,6 +398,13 @@ public class WorldController {
                 break;
             default:
                 throw new RuntimeException("Unknown condition for IfStatement");
+        }
+        if (currentNode == null) {
+            currentTimeline.stop();
+            takenSteps = 0;
+            stopButton.setDisable(true);
+            enableButtons();
+            resultLabel.setText("Jänes ei jõudnud porgandini. Jätka soovi korral taseme läbimist praegusest asukohast või alusta uuesti.");
         }
     }
 

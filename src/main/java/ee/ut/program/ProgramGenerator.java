@@ -255,15 +255,26 @@ public class ProgramGenerator {
                 MatchPair trueTransition = transitions.get(0);
                 MatchPair falseTransition = transitions.get(1);
 
-                List<MatchPair> matchesForTrueLevel = getMatchesForLevel(trueTransition);
-                matchesForTrueLevel.remove(0);
-                List<MatchPair> matchesForFalseLevel = getMatchesForLevel(falseTransition);
-                matchesForFalseLevel.remove(0);
+                if (trueTransition == null) {
+                    ifStatement.setTrueNode(null);
+                } else {
+                    List<MatchPair> matchesForTrueLevel = getMatchesForLevel(trueTransition);
+                    matchesForTrueLevel.remove(0);
 
-                TreeNode trueNode = generateProgram(matchesForTrueLevel, lands, true);
-                TreeNode falseNode = generateProgram(matchesForFalseLevel, lands, false);
-                ifStatement.setTrueNode(trueNode);
-                ifStatement.setFalseNode(falseNode);
+                    TreeNode trueNode = generateProgram(matchesForTrueLevel, lands, true);
+                    ifStatement.setTrueNode(trueNode);
+                }
+
+                if (falseTransition == null) {
+                    ifStatement.setFalseNode(null);
+                } else {
+                    List<MatchPair> matchesForFalseLevel = getMatchesForLevel(falseTransition);
+                    matchesForFalseLevel.remove(0);
+
+                    TreeNode falseNode = generateProgram(matchesForFalseLevel, lands, false);
+                    ifStatement.setFalseNode(falseNode);
+                }
+
                 updateParentsAndChildren(currentNode, ifStatement, isTrueNode);
                 currentNode = ifStatement;
                 if (parentNode == null) parentNode = ifStatement;
