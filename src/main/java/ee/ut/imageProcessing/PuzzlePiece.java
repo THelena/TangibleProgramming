@@ -2,7 +2,7 @@ package ee.ut.imageProcessing;
 
 public enum PuzzlePiece {
     START("start.png", 109),
-    STOP("stop2.png", 115),
+    STOP("stop.png", 115),
     MOVE("move.png", 47),
     IF("if.png", 31),
     WALL("wall.png",61),
