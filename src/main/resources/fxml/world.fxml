@@ -45,7 +45,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button fx:id="startButton" mnemonicParsing="false" onAction="#handleStartButtonClick" text="Käivita programm!" wrapText="true" GridPane.halignment="LEFT" GridPane.valignment="CENTER">
+            <Button fx:id="startButton" mnemonicParsing="false" onAction="#handleStartButtonClick" text="Käivita programm automaatselt!" wrapText="true" GridPane.halignment="LEFT" GridPane.valignment="CENTER">
                <GridPane.margin>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </GridPane.margin></Button>
@@ -66,7 +66,9 @@
                   <Font name="System Bold" size="13.0" />
                </font></Label>
             <Button fx:id="startAgain" mnemonicParsing="false" onAction="#handleStartAgainButtonClick" text="Alusta taset uuesti" GridPane.rowIndex="3" />
-            <Button fx:id="stopButton" mnemonicParsing="false" onAction="#handleStopButtonClick" text="Peata programmi täitmine" wrapText="true" GridPane.columnIndex="1" />
+            <Button fx:id="stopButton" mnemonicParsing="false" visible="false" onAction="#handleStopButtonClick" text="Peata programmi täitmine" wrapText="true" GridPane.columnIndex="1" />
+            <Button fx:id="nextStepButton" mnemonicParsing="false" onAction="#handleNextStepButtonClick" text="Järgmine samm" visible="false" wrapText="true" GridPane.columnIndex="0" />
+            <Button fx:id="startManualButton" mnemonicParsing="false" onAction="#handleStartManualButtonClick" text="Käivita programm manuaalselt!" wrapText="true" GridPane.columnIndex="1" />
          </children>
       </GridPane>
       <GridPane GridPane.columnIndex="1" GridPane.hgrow="always" GridPane.rowIndex="1" GridPane.vgrow="always">

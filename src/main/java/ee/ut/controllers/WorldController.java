@@ -24,13 +24,13 @@ import javafx.scene.layout.RowConstraints;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.apache.commons.io.comparator.LastModifiedFileComparator;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class WorldController {
@@ -69,6 +69,10 @@ public class WorldController {
     private Label resultLabel;
     @FXML
     public Button stopButton;
+    @FXML
+    public Button nextStepButton;
+    @FXML
+    public Button startManualButton;
 
     private Timeline currentTimeline;
     private double halfScreenHeigth = Screen.getPrimary().getVisualBounds().getHeight() / 3.0d;
@@ -111,7 +115,6 @@ public class WorldController {
 
         currentLevel = level;
         hideLevelButtons();
-        stopButton.setDisable(true);
 
         if (currentImageNr == null) currentImageNr = "1";
         Image image = new Image(String.valueOf(getClass().getClassLoader().getResource(worldImageFolder + currentImageNr + ".jpg")));
@@ -226,21 +229,6 @@ public class WorldController {
         return image;
     }
 
-
-    public File getTheNewestFile(String filePath, String ext) {
-        File theNewestFile = null;
-        File dir = new File(filePath);
-        FileFilter fileFilter = new WildcardFileFilter("*." + ext);
-        File[] files = dir.listFiles(fileFilter);
-
-        if (files.length > 0) {
-            Arrays.sort(files, LastModifiedFileComparator.LASTMODIFIED_REVERSE);
-            theNewestFile = files[0];
-        }
-
-        return theNewestFile;
-    }
-
     private void play() {
         if (currentTimeline != null) {
             currentTimeline.stop();
@@ -288,10 +276,7 @@ public class WorldController {
 
     private void executeProgram() {
         if (currentNode == null) {
-            currentTimeline.stop();
-            takenSteps = 0;
-            stopButton.setDisable(true);
-            handleProgramEnd();
+            handleProgramEnd(null);
             return;
         }
 
@@ -301,19 +286,10 @@ public class WorldController {
                 handleMove((Move) currentNode);
                 takenSteps++;
             } catch (CannotWalkIntoTrap cannotWalkIntoTrap) {
-                currentTimeline.stop();
-                takenSteps = 0;
-                stopButton.setDisable(true);
-                resultLabel.setText("Kahjuks sattus jänes lõksu.");
-                enableButtons();
-                startButton.setDisable(true);
+                handleProgramEnd(new CannotWalkIntoTrap());
+
             } catch (CannotWalkIntoWall cannotWalkIntoWall) {
-                currentTimeline.stop();
-                takenSteps = 0;
-                stopButton.setDisable(true);
-                resultLabel.setText("Kahjuks tuli jänesel sein ette.");
-                enableButtons();
-                startButton.setDisable(true);
+                handleProgramEnd(new CannotWalkIntoWall());
             }
 
             if (((Move) currentNode).getSteps() == takenSteps) {
@@ -328,12 +304,7 @@ public class WorldController {
             handleIfStatement((IfStatement) currentNode);
         } else if (currentNode instanceof Jump) {
             if (((Jump) currentNode).getLand() == null) {
-                currentTimeline.stop();
-                takenSteps = 0;
-                stopButton.setDisable(true);
-                enableButtons();
-                resultLabel.setText("Hüppeklotsil puudub vastav maandumisklots.");
-                startButton.setDisable(true);
+                handleProgramEnd(new NoLandForJump());
             } else {
                 currentNode = ((Jump) currentNode).getLand();
             }
@@ -342,34 +313,115 @@ public class WorldController {
         } else if (currentNode instanceof Start) {
             currentNode = ((Start) currentNode).getChild();
         } else if (currentNode instanceof Stop) {
-            currentTimeline.stop();
-            takenSteps = 0;
-            stopButton.setDisable(true);
-            handleProgramEnd();
+            handleProgramEnd(null);
         } else {
             throw new RuntimeException("Unknown ee.ut.program step.");
         }
     }
 
-    private void handleProgramEnd() {
-        enableButtons();
-        if (table.get(rabbitY).get(rabbitX) == 'c') {
-            resultLabel.setText("Tase edukalt läbitud!");
-            startButton.setDisable(true);
+    private void handleProgramEnd(Exception exception) {
+        if (exception == null) {
+            if (table.get(rabbitY).get(rabbitX) == 'c') {
+                // tase läbitud
+                takenSteps = 0;
+                enableDefaultButtons();
+                resultLabel.setText("Tase edukalt läbitud!");
+                if (currentTimeline == null) { // manual
+                    startManualButton.setDisable(true);
+                    nextStepButton.setDisable(true);
+                } else { // automatic
+                    currentTimeline.stop();
+                    startButton.setDisable(true);
+                    stopButton.setDisable(true);
+                }
+            } else {
+                // jäi poolele maale
+                enableDefaultButtons();
+                takenSteps = 0;
+                resultLabel.setText("Jänes ei jõudnud porgandini. Jätka soovi korral taseme läbimist praegusest asukohast või alusta uuesti.");
+                if (currentTimeline == null) { // manual
+                    startManualButton.setDisable(false);
+                    nextStepButton.setVisible(false);
+                    startButton.setVisible(true);
+                    startButton.setDisable(false);
+                } else { // automatic
+                    currentTimeline.stop();
+                    startButton.setDisable(false);
+                    stopButton.setVisible(false);
+                    startManualButton.setVisible(true);
+                    startManualButton.setDisable(false);
+                }
+            }
         } else {
-            resultLabel.setText("Jänes ei jõudnud porgandini. Jätka soovi korral taseme läbimist praegusest asukohast või alusta uuesti.");
+            if (exception instanceof ProgramInterruption) {
+                // vajutati stopp nuppu
+                takenSteps = 0;
+                enableDefaultButtons();
+                resultLabel.setText("Programm on peatatud. Alustage soovi korral taset uuesti või liikuge järgmise taseme juurde.");
+
+                currentTimeline.stop();
+                startButton.setDisable(true);
+                stopButton.setDisable(true);
+            } else if (exception instanceof CannotWalkIntoTrap) {
+                takenSteps = 0;
+                enableDefaultButtons();
+                resultLabel.setText("Kahjuks sattus jänes lõksu. Alustage soovi korral taset uuesti või liikuge järgmise taseme juurde.");
+
+                if (currentTimeline == null) {
+                    nextStepButton.setDisable(true);
+                    startManualButton.setDisable(true);
+                } else {
+                    currentTimeline.stop();
+                    stopButton.setDisable(true);
+                    startButton.setDisable(true);
+                }
+            } else if (exception instanceof CannotWalkIntoWall) {
+                takenSteps = 0;
+                enableDefaultButtons();
+                resultLabel.setText("Kahjuks liikus jänes vastu seina. Alustage soovi korral taset uuesti või liikuge järgmise taseme juurde.");
+
+                if (currentTimeline == null) {
+                    nextStepButton.setDisable(true);
+                    startManualButton.setDisable(true);
+                } else {
+                    currentTimeline.stop();
+                    stopButton.setDisable(true);
+                    startButton.setDisable(true);
+                }
+            } else if (exception instanceof NoLandForJump) {
+                takenSteps = 0;
+                resultLabel.setText("Hüppeklotsil puudub vastav maandumisklots. Alustage soovi korral taset uuesti või liikuge järgmise taseme juurde.");
+                enableDefaultButtons();
+
+                if (currentTimeline == null) {
+                    nextStepButton.setDisable(true);
+                    startManualButton.setDisable(true);
+                } else {
+                    currentTimeline.stop();
+                    stopButton.setDisable(true);
+                    startButton.setDisable(true);
+                }
+            } else if (exception instanceof NoConditionForIfStatement) {
+                takenSteps = 0;
+                resultLabel.setText("Hargnemistükil puudub eelnev tingimus. Alustage soovi korral taset uuesti või liikuge järgmise taseme juurde.");
+                enableDefaultButtons();
+
+                if (currentTimeline == null) {
+                    nextStepButton.setDisable(true);
+                    startManualButton.setDisable(true);
+                } else {
+                    currentTimeline.stop();
+                    stopButton.setDisable(true);
+                    startButton.setDisable(true);
+                }
+            }
         }
-        stopButton.setDisable(true);
+        currentTimeline = null;
     }
 
     private void handleIfStatement(IfStatement ifStatement) {
         if (ifStatement.getCondition() == null) {
-            currentTimeline.stop();
-            takenSteps = 0;
-            stopButton.setDisable(true);
-            enableButtons();
-            resultLabel.setText("Hargnemistükil puudub eelnev tingimus.");
-            startButton.setDisable(true);
+            handleProgramEnd(new NoConditionForIfStatement());
             return;
         }
 
@@ -400,11 +452,7 @@ public class WorldController {
                 throw new RuntimeException("Unknown condition for IfStatement");
         }
         if (currentNode == null) {
-            currentTimeline.stop();
-            takenSteps = 0;
-            stopButton.setDisable(true);
-            enableButtons();
-            resultLabel.setText("Jänes ei jõudnud porgandini. Jätka soovi korral taseme läbimist praegusest asukohast või alusta uuesti.");
+            handleProgramEnd(null);
         }
     }
 
@@ -495,24 +543,23 @@ public class WorldController {
         }
     }
 
-    private void disableButtons() {
-        startButton.setDisable(true);
-        nextImageButton.setDisable(true);
-        nextLevel.setDisable(true);
-        previousImageButton.setDisable(true);
-        lastLevel.setDisable(true);
+    private void disableDefaultButtons() {
         backToMainButton.setDisable(true);
         startAgain.setDisable(true);
+
+        nextImageButton.setDisable(true);
+        previousImageButton.setDisable(true);
+
+        nextLevel.setDisable(true);
+        lastLevel.setDisable(true);
     }
 
-    private void enableButtons() {
-        startButton.setDisable(false);
-        nextImageButton.setDisable(false);
-        nextLevel.setDisable(false);
-        previousImageButton.setDisable(false);
-        lastLevel.setDisable(false);
+    private void enableDefaultButtons() {
         backToMainButton.setDisable(false);
         startAgain.setDisable(false);
+
+        hideImageButtons();
+        hideLevelButtons();
     }
 
     public void handleStartAgainButtonClick(ActionEvent event) throws IOException {
@@ -520,11 +567,11 @@ public class WorldController {
         Pane root = fxmlLoader.load();
 
         WorldController worldController = fxmlLoader.getController();
+
         worldController.setCurrentImageNr(currentImageNr);
         worldController.setPrimaryStage(primaryStage);
         worldController.setSymbolStyle(symbolStyle);
 
-        hideLevelButtons();
         worldController.initialize(currentLevel, primaryStage, root);
     }
 
@@ -533,12 +580,16 @@ public class WorldController {
         resultLabel.setText("Koostan programmi. Palun oota.");
         ProgramGenerator programGenerator = new ProgramGenerator(imageResource, symbolStyle);
 
+        startManualButton.setVisible(false);
+        stopButton.setVisible(true);
+
         final String[] error = {""};
         Task<TreeNode> task = new Task<TreeNode>() {
             @Override
             public TreeNode call() {
                 try {
-                    disableButtons();
+                    disableDefaultButtons();
+                    startButton.setDisable(true);
                     stopButton.setDisable(true);
                     return programGenerator.generateProgram() ;
                 } catch (NoStartPieceError noStartPieceError) {
@@ -555,7 +606,8 @@ public class WorldController {
             if (currentNode == null) {
                 if (error[0].equals("start")) {
                     resultLabel.setText("Programmi loomine ebaõnnestus. Kontrolli, kas programm sisaldab alustamisklotsi.");
-                    enableButtons();
+                    enableDefaultButtons();
+                    startButton.setDisable(false);
                 }
             } else {
                 stopButton.setDisable(false);
@@ -591,17 +643,16 @@ public class WorldController {
         String previousLevelNr = Integer.toString(Integer.parseInt(currentLevel) - 1);
         URL u = this.getClass().getClassLoader().getResource("worlds/" + previousLevelNr + ".txt");
         if (u != null)
-            lastLevel.setVisible(true);
+            lastLevel.setDisable(false);
         else
-            lastLevel.setVisible(false);
-
+            lastLevel.setDisable(true);
 
         String nextLevelNr = Integer.toString(Integer.parseInt(currentLevel) + 1);
         u = this.getClass().getClassLoader().getResource("worlds/" + nextLevelNr+ ".txt");
         if (u != null)
-            nextLevel.setVisible(true);
+            nextLevel.setDisable(false);
         else
-            nextLevel.setVisible(false);
+            nextLevel.setDisable(true);
 
     }
 
@@ -643,17 +694,17 @@ public class WorldController {
         try {
             String previousImageNr = Integer.toString(Integer.parseInt(currentImageNr) - 1);
             Image testImage = new Image(String.valueOf(getClass().getClassLoader().getResource(worldImageFolder + previousImageNr + ".jpg")));
-            previousImageButton.setVisible(true);
+            previousImageButton.setDisable(false);
         } catch (IllegalArgumentException e) {
-            previousImageButton.setVisible(false);
+            previousImageButton.setDisable(true);
         }
 
         try {
             String nextImageNr = Integer.toString(Integer.parseInt(currentImageNr) + 1);
             Image testImage = new Image(String.valueOf(getClass().getClassLoader().getResource(worldImageFolder + nextImageNr + ".jpg")));
-            nextImageButton.setVisible(true);
+            nextImageButton.setDisable(false);
         } catch (IllegalArgumentException e) {
-            nextImageButton.setVisible(false);
+            nextImageButton.setDisable(true);
         }
     }
 
@@ -666,12 +717,53 @@ public class WorldController {
     }
 
     public void handleStopButtonClick(ActionEvent event) throws IOException {
-        currentTimeline.stop();
-        takenSteps = 0;
+        handleProgramEnd(new ProgramInterruption());
+    }
 
-        enableButtons();
-        startButton.setDisable(true);
-        stopButton.setDisable(true);
-        resultLabel.setText("Programmi täitmine on peatatud.");
+    public void handleNextStepButtonClick(ActionEvent event) {
+        executeProgram();
+    }
+
+    public void handleStartManualButtonClick(ActionEvent event) {
+        String imageResource = worldImageFolder + currentImageNr + ".jpg";
+        resultLabel.setText("Koostan programmi. Palun oota.");
+        ProgramGenerator programGenerator = new ProgramGenerator(imageResource, symbolStyle);
+
+        startButton.setVisible(false);
+        nextStepButton.setVisible(true);
+
+        final String[] error = {""};
+        Task<TreeNode> task = new Task<TreeNode>() {
+            @Override
+            public TreeNode call() {
+                try {
+                    disableDefaultButtons();
+                    startManualButton.setDisable(true);
+                    nextStepButton.setDisable(true);
+                    return programGenerator.generateProgram() ;
+                } catch (NoStartPieceError noStartPieceError) {
+                    error[0] = "start";
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            currentNode = task.getValue();
+            if (currentNode == null) {
+                if (error[0].equals("start")) {
+                    resultLabel.setText("Programmi loomine ebaõnnestus. Kontrolli, kas programm sisaldab alustamisklotsi.");
+                    enableDefaultButtons();
+                    startManualButton.setDisable(false);
+                }
+            } else {
+                nextStepButton.setDisable(false);
+                resultLabel.setText("Programm on valmis. Saate seda samm-sammult täitma hakata.");
+            }
+        });
+
+        new Thread(task).start();
     }
 }
