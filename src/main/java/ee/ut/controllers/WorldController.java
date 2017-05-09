@@ -255,7 +255,7 @@ public class WorldController {
                             executeProgram();
                         }
                 ),
-                new KeyFrame(Duration.seconds(1.0d))
+                new KeyFrame(Duration.seconds(0.5d))
         );
         currentTimeline.setCycleCount(Integer.MAX_VALUE);
         currentTimeline.play();
@@ -333,6 +333,7 @@ public class WorldController {
                 stopButton.setDisable(true);
                 enableButtons();
                 resultLabel.setText("Hüppeklotsil puudub vastav maandumisklots.");
+                startButton.setDisable(true);
             } else {
                 currentNode = ((Jump) currentNode).getLand();
             }
@@ -366,6 +367,7 @@ public class WorldController {
             stopButton.setDisable(true);
             enableButtons();
             resultLabel.setText("Hargnemistükil puudub eelnev tingimus.");
+            startButton.setDisable(true);
             return;
         }
 
@@ -380,6 +382,13 @@ public class WorldController {
                 break;
             case ISWALL:
                 if (table.get(nextPos[0]).get(nextPos[1]) == '#') {
+                    currentNode = ifStatement.getTrueNode();
+                } else {
+                    currentNode = ifStatement.getFalseNode();
+                }
+                break;
+            case ISCARROT:
+                if (table.get(nextPos[0]).get(nextPos[1]) == 'c') {
                     currentNode = ifStatement.getTrueNode();
                 } else {
                     currentNode = ifStatement.getFalseNode();
@@ -537,6 +546,7 @@ public class WorldController {
             if (currentNode == null) {
                 if (error[0].equals("start")) {
                     resultLabel.setText("Programmi loomine ebaõnnestus. Kontrolli, kas programm sisaldab alustamisklotsi.");
+                    enableButtons();
                 }
             } else {
                 stopButton.setDisable(false);

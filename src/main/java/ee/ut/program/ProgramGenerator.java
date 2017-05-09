@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ee.ut.imageProcessing.PuzzlePiece.*;
+import static ee.ut.program.elements.Condition.ISCARROT;
 import static ee.ut.program.elements.Condition.ISTRAP;
 import static ee.ut.program.elements.Condition.ISWALL;
 
@@ -55,7 +56,15 @@ public class ProgramGenerator {
         templateHeight = imageParser.getTemplateHeight();
         matches.sort(Comparator.comparing(x -> x.getLocation().x));
         inputImageMat = OpenCVUtil.readInputStreamIntoMat(getClass().getClassLoader().getResourceAsStream(imageResource));
-        return generateProgram(getMatchesForLevel(matches.remove(0)), new ArrayList<>(), false);
+        int indeks = 0;
+        for (MatchPair matchPair : matches) {
+            if (matchPair.getPuzzlePiece() == START) {
+                break;
+            } else {
+                indeks++;
+            }
+        }
+        return generateProgram(getMatchesForLevel(matches.remove(indeks)), new ArrayList<>(), false);
     }
 
     private List<MatchPair> getMatchesForLevel(MatchPair startingMatch) {
@@ -88,13 +97,41 @@ public class ProgramGenerator {
     private Image generateImageForNode(Point coordinates) {
         Point location;
         if (symbolStyle == SymbolStyle.TOPCODES) {
-            location = getClosestPointForTopCode(coordinates);
+            Point closestPoint = getClosestPointForTopCode(coordinates);
+            Point topleftCorner = new Point(closestPoint.x - templateHeight / 2, closestPoint.y - templateHeight / 2);
+            location = new Point(topleftCorner.x - 2 * templateHeight / 3, topleftCorner.y + templateHeight / 2);
         } else {
             location = new Point(coordinates.x - 2 * templateHeight / 3, coordinates.y + templateHeight / 2);
         }
         Mat clone = inputImageMat.clone();
 
         Imgproc.circle(clone, location, templateHeight / 3, new Scalar(0,0,255), -1);
+        return OpenCVUtil.mat2Image(clone);
+    }
+
+    private Image generateImageForTwoNodes(Point coordinates, Point coordinates2) {
+        Point location1;
+        if (symbolStyle == SymbolStyle.TOPCODES) {
+            Point closestPoint = getClosestPointForTopCode(coordinates);
+            Point topleftCorner = new Point(closestPoint.x - templateHeight / 2, closestPoint.y - templateHeight / 2);
+            location1 = new Point(topleftCorner.x - 2 * templateHeight / 3, topleftCorner.y + templateHeight / 2);
+        } else {
+            location1 = new Point(coordinates.x - 2 * templateHeight / 3, coordinates.y + templateHeight / 2);
+        }
+
+        Point location2;
+        if (symbolStyle == SymbolStyle.TOPCODES) {
+            Point closestPoint = getClosestPointForTopCode(coordinates2);
+            Point topleftCorner = new Point(closestPoint.x - templateHeight / 2, closestPoint.y - templateHeight / 2);
+            location2 = new Point(topleftCorner.x - 2 * templateHeight / 3, topleftCorner.y + templateHeight / 2);
+        } else {
+            location2 = new Point(coordinates2.x - 2 * templateHeight / 3, coordinates2.y + templateHeight / 2);
+        }
+
+        Mat clone = inputImageMat.clone();
+
+        Imgproc.circle(clone, location1, templateHeight / 3, new Scalar(0,0,255), -1);
+        Imgproc.circle(clone, location2, templateHeight / 3, new Scalar(0,0,255), -1);
         return OpenCVUtil.mat2Image(clone);
     }
 
@@ -121,6 +158,7 @@ public class ProgramGenerator {
         TreeNode currentNode = null;
         TreeNode parentNode = null;
         Condition ifStatementCondition = null;
+        Point ifStatementConditionLocation = null;
         while (!matchesForLevel.isEmpty()) {
             MatchPair pair = matchesForLevel.remove(0);
 
@@ -131,12 +169,16 @@ public class ProgramGenerator {
                 currentNode = start;
             } else if (pair.getPuzzlePiece() == MOVE) {
                 Move move = new Move();
-                move.setImageWithADot(generateImageForNode(pair.getLocation()));
                 MatchPair argumentForMove = getArgumentForMove(pair);
+
                 if (argumentForMove != null) {
                     if (argumentForMove.getPuzzlePiece() == NUMBER3) move.setSteps(3);
                     else if (argumentForMove.getPuzzlePiece() == NUMBER4) move.setSteps(4);
+                    move.setImageWithADot(generateImageForTwoNodes(pair.getLocation(), argumentForMove.getLocation()));
+                } else {
+                    move.setImageWithADot(generateImageForNode(pair.getLocation()));
                 }
+
                 updateParentsAndChildren(currentNode, move, isTrueNode);
                 currentNode = move;
                 if (parentNode == null) parentNode = move;
@@ -202,7 +244,13 @@ public class ProgramGenerator {
                 if (parentNode == null) parentNode = stop;
             } else if (pair.getPuzzlePiece() == IF) {
                 IfStatement ifStatement = new IfStatement(ifStatementCondition);
-                ifStatement.setImageWithADot(generateImageForNode(pair.getLocation()));
+
+                if (ifStatementCondition != null) {
+                    ifStatement.setImageWithADot(generateImageForTwoNodes(pair.getLocation(), ifStatementConditionLocation));
+                } else {
+                    ifStatement.setImageWithADot(generateImageForNode(pair.getLocation()));
+                }
+
                 List<MatchPair> transitions = getTransitionsForIf(pair);
                 MatchPair trueTransition = transitions.get(0);
                 MatchPair falseTransition = transitions.get(1);
@@ -221,8 +269,13 @@ public class ProgramGenerator {
                 if (parentNode == null) parentNode = ifStatement;
             } else if (pair.getPuzzlePiece() == WALL) {
                 ifStatementCondition = ISWALL;
+                ifStatementConditionLocation = pair.getLocation();
             } else if (pair.getPuzzlePiece() == TRAP) {
                 ifStatementCondition = ISTRAP;
+                ifStatementConditionLocation = pair.getLocation();
+            } else if (pair.getPuzzlePiece() == CARROT) {
+                ifStatementCondition = ISCARROT;
+                ifStatementConditionLocation = pair.getLocation();
             }
         }
         return parentNode;

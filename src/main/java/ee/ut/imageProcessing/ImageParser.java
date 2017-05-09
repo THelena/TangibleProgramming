@@ -51,7 +51,7 @@ public class ImageParser {
      * Scans the images for topcodes and rotates its coordinates to correspond to a horizontal image
      * @return
      */
-    private List<MatchPair> getLocationsForTopcodes() {
+    private List<MatchPair> getLocationsForTopcodes() throws NoStartPieceError {
         Scanner scanner = new Scanner();
         try {
             scan = scanner.scan(ImageIO.read(getClass().getClassLoader().getResourceAsStream(imageResource)));
@@ -60,11 +60,21 @@ public class ImageParser {
         }
 
         List<Point> topCodePoints = new ArrayList<>();
+        TopCode startTopCode = null;
+
         for (TopCode topCode : scan) {
-            if (orientation == null) orientation = topCode.getOrientation();
-            templateHeight = (int) topCode.getDiameter();
+            if (getPieceForTopCode(topCode.getCode()) == START) {
+                if (orientation == null) orientation = topCode.getOrientation();
+                templateHeight = (int) topCode.getDiameter();
+                startTopCode = topCode;
+            }
+
             Point e = new Point(topCode.getCenterX(), topCode.getCenterY());
             topCodePoints.add(e);
+        }
+
+        if (startTopCode == null) {
+            throw new NoStartPieceError();
         }
 
         Mat srcMat;

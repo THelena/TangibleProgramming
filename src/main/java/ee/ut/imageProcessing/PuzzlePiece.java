@@ -7,6 +7,7 @@ public enum PuzzlePiece {
     IF("if.png", 31),
     WALL("wall.png",61),
     TRAP("trap.png", 79),
+    CARROT("carrot.png", 167),
     JUMPX("jumpX.png", 91),
     LANDX("landX.png", 103),
     JUMPY("jumpY.png", 93),
