@@ -4,29 +4,11 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
-<?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
 <GridPane fx:id="parentGrid" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ee.ut.controllers.WorldController">
-  <!--<columnConstraints>-->
-    <!--<ColumnConstraints hgrow="SOMETIMES" maxWidth="445.0" minWidth="10.0" prefWidth="302.0" />-->
-    <!--<ColumnConstraints hgrow="SOMETIMES" maxWidth="338.0" minWidth="10.0" prefWidth="298.0" />-->
-  <!--</columnConstraints>-->
-  <!--<rowConstraints>-->
-    <!--<RowConstraints maxHeight="204.0" minHeight="0.0" prefHeight="199.0" vgrow="SOMETIMES" />-->
-    <!--<RowConstraints maxHeight="267.0" minHeight="10.0" prefHeight="201.0" vgrow="SOMETIMES" />-->
-  <!--</rowConstraints>-->
    <children>
       <GridPane fx:id="gridPane" GridPane.halignment="CENTER" GridPane.hgrow="always" GridPane.valignment="CENTER" GridPane.vgrow="always">
-        <!--<columnConstraints>-->
-          <!--<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
-          <!--<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />-->
-        <!--</columnConstraints>-->
-        <!--<rowConstraints>-->
-          <!--<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />-->
-          <!--<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />-->
-          <!--<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />-->
-        <!--</rowConstraints>-->
       </GridPane>
       <ImageView fx:id="worldImage" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS">
          <image>

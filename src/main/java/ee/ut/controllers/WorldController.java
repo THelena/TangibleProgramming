@@ -242,7 +242,7 @@ public class WorldController {
                             executeProgram();
                         }
                 ),
-                new KeyFrame(Duration.seconds(0.5d))
+                new KeyFrame(Duration.seconds(0.7d))
         );
         currentTimeline.setCycleCount(Integer.MAX_VALUE);
         currentTimeline.play();
