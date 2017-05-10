@@ -562,6 +562,9 @@ public class WorldController {
     }
 
     public void handleStartAgainButtonClick(ActionEvent event) throws IOException {
+        takenSteps = 0;
+        currentTimeline = null;
+
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("fxml/world.fxml"));
         Pane root = fxmlLoader.load();
 
@@ -576,7 +579,7 @@ public class WorldController {
 
     public void handleStartButtonClick(ActionEvent event) {
         String imageResource = worldImageFolder + currentImageNr + ".jpg";
-        resultLabel.setText("Koostan programmi. Palun oota.");
+        resultLabel.setText("Koostan programmi. Palun oodake.");
         ProgramGenerator programGenerator = new ProgramGenerator(imageResource, symbolStyle);
 
         startManualButton.setVisible(false);
@@ -760,6 +763,7 @@ public class WorldController {
             } else {
                 nextStepButton.setDisable(false);
                 resultLabel.setText("Programm on valmis. Saate seda samm-sammult täitma hakata.");
+                startAgain.setDisable(false);
             }
         });
 
