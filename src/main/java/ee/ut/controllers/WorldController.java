@@ -610,6 +610,10 @@ public class WorldController {
                     resultLabel.setText("Programmi loomine ebaõnnestus. Kontrolli, kas programm sisaldab alustamisklotsi.");
                     enableDefaultButtons();
                     startButton.setDisable(false);
+
+                    stopButton.setVisible(false);
+                    startManualButton.setVisible(true);
+                    startManualButton.setDisable(false);
                 }
             } else {
                 stopButton.setDisable(false);
@@ -759,6 +763,10 @@ public class WorldController {
                     resultLabel.setText("Programmi loomine ebaõnnestus. Kontrolli, kas programm sisaldab alustamisklotsi.");
                     enableDefaultButtons();
                     startManualButton.setDisable(false);
+
+                    nextStepButton.setVisible(false);
+                    startButton.setVisible(true);
+                    startButton.setDisable(false);
                 }
             } else {
                 nextStepButton.setDisable(false);
